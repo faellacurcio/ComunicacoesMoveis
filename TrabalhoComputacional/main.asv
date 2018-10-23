@@ -120,9 +120,7 @@ for loop = 1:max_iterations
     result3matrix = [result3matrix; aux];
 end
 
-%% Primeira questão item 4
-
-result4matrix = [];
+result2matrix = [];
 aux = [];
 timepercentage = 0.5;
 
@@ -132,23 +130,14 @@ for loop = 1:max_iterations
     setUsers()
     
     %SINR for the MACRO CELL
-    SINR = (powerMacro + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+    SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
     aux(1) = capacity(timepercentage, SINR);
     
     %SINR for the PICO CELL
-    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
-    aux(1) = aux(1) + capacity(timepercentage, SINR);
+    SINR = powerPico / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+    aux(2) = capacity(1-timepercentage, SINR);
     
-    %SINR for the MACRO CELL
-    SINR = (powerMacro + min(20,360/angle)) / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
-    aux(2) = capacity(timepercentage, SINR);
-    
-    %SINR for the PICO CELL
-    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
-    aux(2) = aux(2) + capacity(timepercentage, SINR);
-    
-    result4matrix = [result4matrix; aux];
-    
+    result2matrix = [result2matrix; aux];
 end
 %% -- Function declarations --
 
