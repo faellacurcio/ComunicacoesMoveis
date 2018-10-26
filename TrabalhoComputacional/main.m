@@ -9,9 +9,9 @@ ERB = [0 0 2000];
 
 global TM_table
 
-global PicoCell
+global PicoTower
 
-PicoCell = [1700 0 300];
+PicoTower = [1700 0 300];
 
 global max_users
 
@@ -46,15 +46,16 @@ shouldPlotMap = 0;
 %% -- Plot elements --
 if(shouldPlotMap)
     setUsers()
+    
     scatter(ERB(1),ERB(2),'*')
     hold on
-    scatter(PicoCell(1),PicoCell(2),'*')
+    scatter(PicoTower(1),PicoTower(2),'*')
 
     for x = 1:1:max_users
         scatter(TM_table(x,1), TM_table(x,2))
     end
     circle(ERB(1),ERB(2),ERB(3));
-    circle(PicoCell(1),PicoCell(2),PicoCell(3));
+    circle(PicoTower(1),PicoTower(2),PicoTower(3));
     hold off
 end
 
@@ -65,7 +66,7 @@ result3matrix = [];
 result4matrix = [];
     
 aux = [];
-max_iterations = 500;
+max_iterations = 100;
 
 
 % Loop
@@ -76,12 +77,15 @@ for loop = 1:max_iterations
     %Create new users randomly spread through the area
     setUsers()
     
+    
     %SINR for the MACRO CELL
     SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+    
     aux(1) = capacity(1, SINR);
     
     %SINR for the PICO CELL
-    SINR = powerPico / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+    SINR = powerPico / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
+    
     aux(2) = capacity(1, SINR);
     
     result1matrix = [result1matrix; aux];
@@ -90,15 +94,13 @@ for loop = 1:max_iterations
 
     aux = [];
     timepercentage = 0.5;
-
-
     
     %SINR for the MACRO CELL
     SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
     aux(1) = capacity(timepercentage, SINR);
     
     %SINR for the PICO CELL
-    SINR = powerPico / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+    SINR = powerPico / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
     aux(2) = capacity(1-timepercentage, SINR);
     
     result2matrix = [result2matrix; aux];
@@ -114,7 +116,7 @@ for loop = 1:max_iterations
     aux(1) = capacity(1, SINR);
     
     %SINR for the PICO CELL
-    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
     aux(2) = capacity(1, SINR);
     
     result3matrix = [result3matrix; aux];
@@ -125,11 +127,11 @@ for loop = 1:max_iterations
     timepercentage = 0.5;
     
     %SINR for the MACRO CELL
-    SINR = (powerMacro + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
     aux(1) = capacity(timepercentage, SINR);
     
     %SINR for the PICO CELL
-    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) + powerNoise);
     aux(1) = aux(1) + capacity(timepercentage, SINR);
     
     %SINR for the MACRO CELL
@@ -137,7 +139,7 @@ for loop = 1:max_iterations
     aux(2) = capacity(timepercentage, SINR);
     
     %SINR for the PICO CELL
-    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+    SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
     aux(2) = aux(2) + capacity(timepercentage, SINR);
     
     result4matrix = [result4matrix; aux];
@@ -155,7 +157,7 @@ cdfCompare(result4matrix)
 function setUsers()
     
     global max_users
-    global PicoCell
+    global PicoTower
     radius_usr1 = 2000;
     radius_usr2 = 300;
     
@@ -166,9 +168,9 @@ function setUsers()
     angle = 2*pi*rand(max_users,1);
 
     % TM_table =>
-    %               |----------------------X,Y---------------------|-----------Picocell---------|
+    %               |----------------------X,Y---------------------|-----------PicoTower---------|
     global TM_table
-    TM_table    =   [randRadius.*cos(angle) randRadius.*sin(angle)]+[0 0;PicoCell(1) PicoCell(2)];
+    TM_table    =   [randRadius.*cos(angle) randRadius.*sin(angle)]+[0 0;PicoTower(1) PicoTower(2)];
     
 end
 
@@ -192,9 +194,9 @@ end
 
 function cdfCompare(datamatrix)
     figure
-    cdfplot(normalizeData(datamatrix(:,1)))
+    cdfplot((datamatrix(:,1)))
     hold on
-    cdfplot(normalizeData(datamatrix(:,2)))
+    cdfplot((datamatrix(:,2)))
     legend('User 1 (macro)','User 2 (pico)','Location','best')
     hold off
 end
