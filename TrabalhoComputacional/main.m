@@ -125,6 +125,7 @@ for loop = 1:max_iterations
 
     aux = [];
     timepercentage = 0.5;
+    angle = 10;
     
     %SINR for the MACRO CELL
     SINR = (powerPico + min(20,360/angle)) / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
