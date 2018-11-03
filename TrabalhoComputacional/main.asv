@@ -73,9 +73,9 @@ global timepercentage_2;
 global timepercentage_4;
 global angle_4;
 
-timepercentage_2 = 0.5;
+timepercentage_2 = 0.9;
 timepercentage_4 = 0.5;
-angle_4 = 70;
+angle_4 = 20;
 
 
 % Loop
@@ -154,6 +154,7 @@ for loop = 1:max_iterations
     
 end
 
+folder_name = 'fig\';
 
 % cdfCompare(result1matrix, 1)
 % 
@@ -225,7 +226,7 @@ function cdfCompare(datamatrix, extra_param)
     if (extra_param == 2 )
         title(strcat('Cenário ', int2str(extra_param), ' macroTime: ', num2str(timepercentage_2 ) ) )
     elseif(extra_param == 4)
-        title(strcat('Cenário ', int2str(extra_param), ' macroTime: ', num2str(timepercentage_4) , ' angle: ', num2str(min(20,(360/angle_4)) ) ) )
+        title(strcat('Cenário ', int2str(extra_param), ' macroTime: ', num2str(timepercentage_4) , ' angle: ', num2str(angle_4) ) )
     else
         title(strcat('Cenário ', int2str(extra_param)))
     end
