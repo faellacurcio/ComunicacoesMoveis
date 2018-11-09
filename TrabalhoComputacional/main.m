@@ -144,26 +144,25 @@ for loop = 1:max_iterations
     
     %SINR for the MACRO CELL
     SINR = (powerMacro + min(20,360/angle_4)) / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
-    aux(2) = capacity(timepercentage_4, SINR);
+    aux(2) = capacity(1 - timepercentage_4, SINR);
     
     %SINR for the PICO CELL
     SINR = (powerPico + min(20,360/angle_4)) / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
-    aux(2) = aux(2) + capacity(timepercentage_4, SINR);
+    aux(2) = aux(2) + capacity(1 - timepercentage_4, SINR);
     
     result4matrix = [result4matrix; aux];
     
 end
 
 
-% cdfCompare(result1matrix, 1)
-% 
-% cdfCompare(result2matrix, 2)
-% 
-% cdfCompare(result3matrix, 3)
+cdfCompare(result1matrix, 1)
+
+cdfCompare(result2matrix, 2)
+
+cdfCompare(result3matrix, 3)
 
 cdfCompare(result4matrix, 4)
 
-close all
 
 %% -- Function declarations --
 
@@ -192,9 +191,8 @@ function C = capacity(uovertT, SINR) %(bits/s)
     
     global B
     global alpha
-    global T
     global beta
-    C = min((uovertT/T)*alpha*B*log2(1+SINR/beta),10^7);
+    C = min((uovertT)*alpha*B*log2(1+SINR/beta),10^7);
         
 end
 
