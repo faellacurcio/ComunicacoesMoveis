@@ -80,10 +80,10 @@ for loopout = 1:18
 
     aux = [];
 
-    timepercentage_2 = timepercentage_2 - 0.05;
-    timepercentage_4 = timepercentage_4 - 0.05;
+    timepercentage_2 = timepercentage_2 - 0.1;
+    timepercentage_4 = timepercentage_4 - 0.1;
 
-    angle_3 = angle_3 + loopout;
+    angle_3 = angle_3 + 2*loopout;
 
 
     % Loop
