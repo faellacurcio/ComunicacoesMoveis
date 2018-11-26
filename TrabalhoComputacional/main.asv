@@ -80,10 +80,10 @@ for loopout = 1:18
 
     aux = [];
 
-    timepercentage_2 = timepercentage_2 - 0.1;
-    timepercentage_4 = timepercentage_4 - 0.1;
+    timepercentage_2 = timepercentage_2 - 0.05;
+    timepercentage_4 = timepercentage_4 - 0.05;
 
-    angle_3 = angle_3 + 2*loopout;
+    angle_3 = angle_3 + loopout;
 
 
     % Loop
@@ -96,21 +96,22 @@ for loopout = 1:18
 
 
         %SINR for the MACRO CELL
-        SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+        interference = powerPico / (pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) + powerNoise);
+        SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise + interference);
 
         aux(1) = capacity(1, SINR);
 
         %SINR for the PICO CELL
-        SINR = powerPico / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
+        interference = powerMacro / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+        SINR = powerPico / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise + interference);
 
         aux(2) = capacity(1, SINR);
 
         result1matrix = [result1matrix; aux];
 
         %% Primeira questão item 2
-
+% 
         aux = [];
-
 
         %SINR for the MACRO CELL
         SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);

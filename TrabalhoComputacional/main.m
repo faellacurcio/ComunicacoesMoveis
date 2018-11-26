@@ -89,28 +89,30 @@ for loopout = 1:18
     % Loop
     for loop = 1:max_iterations
 
-        %% Primeira questão item 1
-
         %Create new users randomly spread through the area
         setUsers()
 
+        %% Primeira questão item 1
+        %
+
 
         %SINR for the MACRO CELL
-        SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+        interference = powerPico / (pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) + powerNoise);
+        SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise + interference);
 
         aux(1) = capacity(1, SINR);
 
         %SINR for the PICO CELL
-        SINR = powerPico / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
+        interference = powerMacro / (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) + powerNoise);
+        SINR = powerPico / (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise + interference);
 
         aux(2) = capacity(1, SINR);
 
         result1matrix = [result1matrix; aux];
 
         %% Primeira questão item 2
-
+        % SINR é 
         aux = [];
-
 
         %SINR for the MACRO CELL
         SINR = powerMacro / (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
