@@ -2,11 +2,13 @@ clc
 clear
 close all
 
+set(groot,'defaultLineLineWidth',2)
+
 %% -- Control Variables --
 
 interestingPlot = [];
-
-ERB = [0 0 2000];
+reference = [2000 0];
+MacroTower = [0 0 2000];
 
 global TM_table
 
@@ -28,19 +30,19 @@ global alpha
 global beta 
 global B 
 
-powerMacro = 40 - 30; %(db)
-powerPico = 7 - 30; %(db)
-powerNoise = -115 - 30; % (db)
+powerMacro = 40-30; %(db)
+powerPico = 7-30; %(db)
+powerNoise = -115-30; % (db)
 T = 0.001; %(s)
 n = 4;
 d0 = 1; %(m)
 alpha = 0.9;
 beta = 1.1; 
-B = 5000; %(Hz)
+B = 5*10^6; %(Hz)
 
 %% -- Pos Excecution Control --
 
-shouldPlotMap = 1;
+shouldPlotMap = 0;
 % 1 for printing map
 % 0 for omitting the plot
 
@@ -48,21 +50,40 @@ shouldPlotMap = 1;
 if(shouldPlotMap)
     setUsers()
     
-    scatter(ERB(1),ERB(2),'*')
+    scatter(MacroTower(1),MacroTower(2),'*')
     hold on
     scatter(PicoTower(1),PicoTower(2),'*')
 
     for x = 1:1:max_users
         scatter(TM_table(x,1), TM_table(x,2))
     end
-    circle(ERB(1),ERB(2),ERB(3));
+    circle(MacroTower(1),MacroTower(2),MacroTower(3));
     circle(PicoTower(1),PicoTower(2),PicoTower(3));
+    hold on
+    
+    angle1 = atan2d(TM_table(1,2), TM_table(1,1))+10;
+    xplot = [0 cosd(angle1)*MacroTower(3)];
+    yplot = [0 sind(angle1)*MacroTower(3)];
+    plot(xplot, yplot)
+    angle2 = atan2d(TM_table(1,2), TM_table(1,1))-10;
+    xplot = [0 cosd(angle2)*MacroTower(3)];
+    yplot = [0 sind(angle2)*MacroTower(3)];
+    plot(xplot, yplot)
+    
+    angle3 = atan2d(TM_table(2,2)-PicoTower(2), TM_table(2,1)-PicoTower(1))+10;
+    xplot = [PicoTower(1) PicoTower(1)+cosd(angle3)*PicoTower(3)];
+    yplot = [PicoTower(2) sind(angle3)*PicoTower(3)];
+    plot(xplot, yplot)
+    angle4 = atan2d(TM_table(2,2)-PicoTower(2), TM_table(2,1)-PicoTower(1))-10;
+    xplot = [PicoTower(1) PicoTower(1)+cosd(angle4)*PicoTower(3)];
+    yplot = [PicoTower(2) sind(angle4)*PicoTower(3)];
+    plot(xplot, yplot)
     hold off
 end
 
 %% -- MAIN  --
 
-max_iterations = 1000;
+max_iterations = 10000;
 
 global timepercentage_2;
 global timepercentage_4;
@@ -72,7 +93,7 @@ timepercentage_2 = 1;
 timepercentage_4 = 1;
 angle_3 = 18;
 
-for loopout = 1:1
+for loopout = 1:18
 
     result1matrix = [];
     result2matrix = [];
@@ -91,39 +112,40 @@ for loopout = 1:1
     for loop = 1:max_iterations
 
         %Create new users randomly spread through the area
-%         setUsers()
+        setUsers()
 
         %% Primeira questão item 1
         %
 
-
         %SINR for the MACRO CELL
-        potencia_recebida = powerMacro - pathLoss(hypot(TM_table(1,1),TM_table(1,2)));
-        potencia_interferente = powerPico - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2)));
-        SINR = potencia_recebida - lin2db(db2lin(potencia_interferente) + db2lin(powerNoise));
+        potencia_recebida1 = powerMacro - pathLoss(hypot(TM_table(1,1),TM_table(1,2)));
+        potencia_interferente1 = powerPico - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2)));
+        SINR1 = potencia_recebida1 - lin2db(db2lin(potencia_interferente1) + db2lin(powerNoise));
 
-        aux(1) = capacity(1, db2lin(SINR));
+        aux(1) = capacity(1, SINR1);
+
 
         %SINR for the PICO CELL
-        potencia_recebida = powerMacro - pathLoss(hypot(TM_table(2,1),TM_table(2,2)));
-        potencia_interferente = powerPico - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2)));
-        SINR = potencia_recebida - lin2db(db2lin(potencia_interferente) + db2lin(powerNoise));
+        potencia_recebida2 = powerPico - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2)));
+        potencia_interferente2 = powerMacro - pathLoss(hypot(TM_table(2,1),TM_table(2,2)));
+        SINR2 = potencia_recebida2 - lin2db(db2lin(potencia_interferente2) + db2lin(powerNoise));
         
-        aux(2) = capacity(1, db2lin(SINR));
+        aux(2) = capacity(1, SINR2);
 
         result1matrix = [result1matrix; aux];
 
         %% Primeira questão item 2
-        % SINR é 
+        % SINR é a mesma SNR já que há multiplexação no tempo
+        
         aux = [];
 
         %SINR for the MACRO CELL
-        SINR = powerMacro - (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise);
-        aux(1) = capacity(timepercentage_2, db2lin(SINR));
+        SINR = powerMacro - (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+        aux(1) = capacity(timepercentage_2, SINR);
 
         %SINR for the PICO CELL
-        SINR = powerPico - (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise);
-        aux(2) = capacity(1-timepercentage_2, db2lin(SINR));
+        SINR = powerPico - (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
+        aux(2) = capacity(1 - timepercentage_2, SINR);
 
         result2matrix = [result2matrix; aux];
 
@@ -131,15 +153,14 @@ for loopout = 1:1
 
 
         aux = [];
-        angle = 10;
 
         %SINR for the MACRO CELL
-        SINR = (powerMacro + min(20,360/angle)) - (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise);
-        aux(1) = capacity(1, db2lin(SINR));
+        SINR = (powerMacro + min(20,360/angle_3)) -  pathLoss( hypot(TM_table(1,1),TM_table(1,2))) - powerNoise ;
+        aux(1) = capacity(1, SINR);
 
         %SINR for the PICO CELL
-        SINR = (powerPico + min(20,360/angle)) - (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise);
-        aux(2) = capacity(1, db2lin(SINR));
+        SINR = (powerPico + min(20,360/angle_3)) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise;
+        aux(2) = capacity(1, SINR);
 
         result3matrix = [result3matrix; aux];
 
@@ -148,20 +169,20 @@ for loopout = 1:1
         aux = [];
 
         %SINR for the MACRO CELL
-        SINR = (powerPico) - (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise);
-        aux(1) = capacity(timepercentage_4, db2lin(SINR));
+        SINR = (powerPico) - pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise;
+        aux(1) = capacity(timepercentage_4, SINR);
 
         %SINR for the PICO CELL
-        SINR = (powerPico) - (pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) - powerNoise);
-        aux(1) = aux(1) + capacity(timepercentage_4, db2lin(SINR));
+        SINR = (powerPico) - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) - powerNoise;
+        aux(1) = aux(1) + capacity(timepercentage_4, SINR);
 
         %SINR for the MACRO CELL
-        SINR = (powerMacro) - (pathLoss(hypot(TM_table(2,1),TM_table(2,2))) - powerNoise);
-        aux(2) = capacity(1 - timepercentage_4, db2lin(SINR));
+        SINR = (powerMacro) - pathLoss(hypot(TM_table(2,1),TM_table(2,2))) - powerNoise;
+        aux(2) = capacity(1 - timepercentage_4, SINR);
 
         %SINR for the PICO CELL
-        SINR = (powerPico) - (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise);
-        aux(2) = aux(2) + capacity(1 - timepercentage_4, db2lin(SINR));
+        SINR = (powerPico) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise;
+        aux(2) = aux(2) + capacity(1 - timepercentage_4, SINR);
 
         result4matrix = [result4matrix; aux];
 
@@ -169,15 +190,15 @@ for loopout = 1:1
 
 cdfCompare(result1matrix, 1)
 
-% cdfCompare(result2matrix, 2)
+cdfCompare(result2matrix, 2)
 
 interestingPlot(loopout,:) = mean(result2matrix,1);
 
-% cdfCompare(result3matrix, 3)
+cdfCompare(result3matrix, 3)
 
-% cdfCompare(result4matrix, 4)
+cdfCompare(result4matrix, 4)
 
-% close all
+close all
 end
 
 %% -- Function declarations --
@@ -187,11 +208,11 @@ function setUsers()
     
     global max_users
     global PicoTower
-    radius_usr1 = 2000;
-    radius_usr2 = 300;
+    radius_twr1 = 2000;
+    radius_twr2 = 300;
     
     % randRadius = [radius*sqrt(rand(max_users,1))];
-    randRadius = [radius_usr1*sqrt(rand(1,1)); radius_usr2*sqrt(rand(1,1))];
+    randRadius = [radius_twr1*sqrt(rand(1,1)); radius_twr2*sqrt(rand(1,1))];
 
     % generate random angle for TM
     angle = 2*pi*rand(max_users,1);
@@ -208,7 +229,7 @@ function C = capacity(uovertT, SINR) %(bits/s)
     global B
     global alpha
     global beta
-    C = min((uovertT)*alpha*B*log2(1+dbm2lin(SINR)/beta),10^7);
+    C = min((uovertT)*alpha*B*log2(1+db2lin(SINR)/beta),10^7);
 
 end
 
@@ -234,7 +255,7 @@ function cdfCompare(datamatrix, extra_param)
     aux = figure;
     cdfplot(datamatrix(:,1))
     hold on
-%     cdfplot(datamatrix(:,2))
+    cdfplot(datamatrix(:,2))
     
     if (extra_param == 2 )
         title(strcat('Cenário ', int2str(extra_param), ' macroTime: ', num2str(timepercentage_2 ) ) )
@@ -244,6 +265,7 @@ function cdfCompare(datamatrix, extra_param)
         title(strcat('Cenário ', int2str(extra_param), ' macroTime: ', num2str(timepercentage_4) ) )
     else
         title(strcat('Cenário ', int2str(extra_param)))
+%         set(gca, 'XScale', 'log')
     end
     
     legend('User 1 (macro)','User 2 (pico)','Location','best')
@@ -261,12 +283,12 @@ function result = dbm2lin(input)
     result = 10.^((input-30)/10);
 end
 
-function result = db2lin(input)
-    result = 10.^((input)/10);
-end
-
 function result = lin2dbm(input)
     result = 10*log10(input) + 30;
+end
+
+function result = db2lin(input)
+    result = 10.^((input)/10);
 end
 
 function result = lin2db(input)
