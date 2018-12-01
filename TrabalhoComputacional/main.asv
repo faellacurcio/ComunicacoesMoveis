@@ -42,9 +42,20 @@ alpha = 0.9;
 beta = 1.1; 
 B = 5*10^6; %(Hz)
 
+max_iterations = 10000;
+
+global timepercentage_2;
+global timepercentage_4;
+global angle_3;
+
+timepercentage_2 = 1;
+timepercentage_4 = 1;
+angle_3 = 18;
+
+
 %% -- Pos Excecution Control --
 
-shouldPlotMap = 0;
+shouldPlotMap = 1;
 % 1 for printing map
 % 0 for omitting the plot
 
@@ -55,16 +66,6 @@ if(shouldPlotMap)
 end
 
 %% -- MAIN  --
-
-max_iterations = 10000;
-
-global timepercentage_2;
-global timepercentage_4;
-global angle_3;
-
-timepercentage_2 = 1;
-timepercentage_4 = 1;
-angle_3 = 18;
 
 for loopout = 1:18
 
@@ -238,36 +239,49 @@ function plotScenario()
     global max_users
     global TM_table
     global angle_3
+    markerSize = 50;
     
-    scatter(MacroTower(1),MacroTower(2),'*')
+    %Plot antennas
+    scatter(MacroTower(1),MacroTower(2),markerSize,'d')
     hold on
-    scatter(PicoTower(1),PicoTower(2),'*')
-
+    scatter(PicoTower(1),PicoTower(2),markerSize ,'d', 'filled')
+    
+    % Plot Users
     for x = 1:1:max_users
-        scatter(TM_table(x,1), TM_table(x,2))
+        scatter(TM_table(x,1), TM_table(x,2),'filled')
     end
+    
+    % Plot antennas range
     circle(MacroTower(1),MacroTower(2),MacroTower(3));
     circle(PicoTower(1),PicoTower(2),PicoTower(3));
+    legend('Antenna Macro','Antenna Pico','User Macro','User Pico')
+    title('With Beamforming')
+    xlabel('Distance (m)')
+    ylabel('Distance (m)')
+    grid on
     hold on
     
+    
+    %plot beamforming angle 
     angle1 = atan2d(TM_table(1,2), TM_table(1,1))+angle_3/2;
     xplot = [0 cosd(angle1)*MacroTower(3)];
     yplot = [0 sind(angle1)*MacroTower(3)];
-    plot(xplot, yplot)
+    plot(xplot, yplot, 'LineWidth',1)
     angle2 = atan2d(TM_table(1,2), TM_table(1,1))-angle_3/2;
     xplot = [0 cosd(angle2)*MacroTower(3)];
     yplot = [0 sind(angle2)*MacroTower(3)];
-    plot(xplot, yplot)
+    plot(xplot, yplot, 'LineWidth',1)
     
     angle3 = atan2d(TM_table(2,2)-PicoTower(2), TM_table(2,1)-PicoTower(1))+angle_3/2;
     xplot = [PicoTower(1) PicoTower(1)+cosd(angle3)*MacroTower(3)];
     yplot = [PicoTower(2) sind(angle3)*MacroTower(3)];
-    plot(xplot, yplot)
+    plot(xplot, yplot, 'LineWidth',1)
     angle4 = atan2d(TM_table(2,2)-PicoTower(2), TM_table(2,1)-PicoTower(1))-angle_3/2;
     xplot = [PicoTower(1) PicoTower(1)+cosd(angle4)*MacroTower(3)];
     yplot = [PicoTower(2) sind(angle4)*MacroTower(3)];
-    plot(xplot, yplot)
+    plot(xplot, yplot, 'LineWidth',1)
     axis([-2500 2500 -2500 2500])
+    
     grid on
     hold off
 end
