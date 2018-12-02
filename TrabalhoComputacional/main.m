@@ -89,7 +89,7 @@ for loopout = 1:18
         %Create new users randomly spread through the area
         setUsers()
 
-        %% Primeira questão item 1
+    %% Primeira questão item 1
         %
 
         %SINR for the MACRO CELL
@@ -109,17 +109,17 @@ for loopout = 1:18
 
         result1matrix = [result1matrix; aux];
 
-        %% Primeira questão item 2
+     %% Primeira questão item 2
         % SINR é a mesma SNR já que há multiplexação no tempo
         
         aux = [];
 
         %SINR for the MACRO CELL
-        SINR = powerMacro - (pathLoss(hypot(TM_table(1,1),TM_table(1,2))) + powerNoise);
+        SINR = powerMacro - pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise;
         aux(1) = capacity(timepercentage_2, SINR);
 
         %SINR for the PICO CELL
-        SINR = powerPico - (pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) + powerNoise);
+        SINR = powerPico - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise;
         aux(2) = capacity(1 - timepercentage_2, SINR);
 
         result2matrix = [result2matrix; aux];
@@ -172,7 +172,7 @@ for loopout = 1:18
         aux = [];
 
         %SINR for the MACRO CELL
-        SINR = (powerPico) - pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise;
+        SINR = (powerMacro) - pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise;
         aux(1) = capacity(timepercentage_4, SINR);
 
         %SINR for the PICO CELL
@@ -205,9 +205,9 @@ close all
 end
 
 %plot InterestingPlot (scenario 3)
-scatter(0.95:-0.05:0.1,interestingPlot(:,1));
+plot(0.95:-0.05:0.1,interestingPlot(:,1),'-x');
 hold on; 
-scatter(0.95:-0.05:0.1,interestingPlot(:,2));
+plot(0.95:-0.05:0.1,interestingPlot(:,2),'-x');
 hold off;
 
 %% -- Function declarations --
@@ -217,11 +217,11 @@ function setUsers()
     
     global max_users
     global PicoTower
-    radius_twr1 = 2000;
-    radius_twr2 = 300;
+    radius_Macro = 2000;
+    radius_Pico = 300;
     
     % randRadius = [radius*sqrt(rand(max_users,1))];
-    randRadius = [radius_twr1*sqrt(rand(1,1)); radius_twr2*sqrt(rand(1,1))];
+    randRadius = [radius_Macro*sqrt(rand(1,1)); radius_Pico*sqrt(rand(1,1))];
 
     % generate random angle for TM
     angle = 2*pi*rand(max_users,1);
@@ -254,7 +254,7 @@ function plotScenario()
     % Plot antennas range
     circle(MacroTower(1),MacroTower(2),MacroTower(3));
     circle(PicoTower(1),PicoTower(2),PicoTower(3));
-%     legend('Antenna Macro','Antenna Pico','User Macro','User Pico')
+    
 %     title('Without Beamforming')
     xlabel('Distance (m)')
     ylabel('Distance (m)')
@@ -281,6 +281,8 @@ function plotScenario()
     yplot = [PicoTower(2) sind(angle4)*MacroTower(3)];
     plot(xplot, yplot, 'LineWidth',1)
     axis([-2500 2500 -2500 2500])
+    
+    legend('Antenna Macro','Antenna Pico','User Macro','User Pico')
     
     grid on
     hold off

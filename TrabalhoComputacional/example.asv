@@ -19,19 +19,10 @@ B = 5*10^6; %(Hz)
 % disp('capacity')
 % capacity(1,SINR1)
 
-%% CAPACIDADE NA BORDA
-
-% MACRO
 perda = db2lin(38.3 + 10*4*log10(2000));
 ruido = dbm2lin(-115);
 SNR = db2lin(10);
-capacity(1, db2lin(powerMacro) / lin2db(perda*ruido))
-
-% PICO
-perda = db2lin(38.3 + 10*4*log10(300));
-ruido = dbm2lin(-115);
-SNR = db2lin(-23);
-capacity(1, db2lin(powerPico) / lin2db(perda*ruido))
+lin2db(perda*ruido)
 
 function C = capacity(uovertT, SINR) %(bits/s)
     
