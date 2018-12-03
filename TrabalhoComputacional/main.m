@@ -44,6 +44,9 @@ B = 5*10^6; %(Hz)
 
 max_iterations = 10000;
 
+global cenario3_interf
+cenario3_interf = [];
+
 global timepercentage_2;
 global timepercentage_4;
 global angle_3;
@@ -73,6 +76,8 @@ for loopout = 1:18
     result2matrix = [];
     result3matrix = [];
     result4matrix = [];
+    
+    cenario3_interf = [cenario3_interf; 0];
 
     aux = [];
 
@@ -144,6 +149,10 @@ for loopout = 1:18
         else
             interference_pico2macro = false;
         end
+        
+        if(interference_macro2pico || interference_pico2macro)
+           cenario3_interf(loopout) = cenario3_interf(loopout) + 1;
+        end
             
         %SINR for the MACRO CELL
         if(interference_pico2macro)
@@ -171,21 +180,23 @@ for loopout = 1:18
 
         aux = [];
 
-        %SINR for the MACRO CELL
-        SINR = (powerMacro) - pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise;
+        %SINR for the user MACRO CELL
+        SINR = lin2db(...
+                      db2lin((powerMacro) - pathLoss(hypot(TM_table(1,1),TM_table(1,2)))) ...
+                    + db2lin((powerPico) - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))))...
+                ) ...
+                - powerNoise;
+            
         aux(1) = capacity(timepercentage_4, SINR);
 
-        %SINR for the PICO CELL
-        SINR = (powerPico) - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) - powerNoise;
-        aux(1) = aux(1) + capacity(timepercentage_4, SINR);
-
-        %SINR for the MACRO CELL
-        SINR = (powerMacro) - pathLoss(hypot(TM_table(2,1),TM_table(2,2))) - powerNoise;
+        %SINR for the user PICO CELL
+        SINR = lin2db(...
+                      db2lin((powerMacro) - pathLoss(hypot(TM_table(2,1),TM_table(2,2)))) ...
+                    + db2lin((powerPico) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))))...
+                ) ...
+                - powerNoise;
+            
         aux(2) = capacity(1 - timepercentage_4, SINR);
-
-        %SINR for the PICO CELL
-        SINR = (powerPico) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise;
-        aux(2) = aux(2) + capacity(1 - timepercentage_4, SINR);
 
         result4matrix = [result4matrix; aux];
 
@@ -204,11 +215,11 @@ cdfCompare(result4matrix, 4)
 close all
 end
 
-%plot InterestingPlot (scenario 3)
-plot(0.95:-0.05:0.1,interestingPlot(:,1),'-x');
-hold on; 
-plot(0.95:-0.05:0.1,interestingPlot(:,2),'-x');
-hold off;
+% %plot InterestingPlot (scenario 3)
+% plot(0.95:-0.05:0.1,interestingPlot(:,1),'-x');
+% hold on; 
+% plot(0.95:-0.05:0.1,interestingPlot(:,2),'-x');
+% hold off;
 
 %% -- Function declarations --
 

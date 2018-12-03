@@ -44,6 +44,9 @@ B = 5*10^6; %(Hz)
 
 max_iterations = 10000;
 
+global cenario3_interf
+cenario3_interf = [];
+
 global timepercentage_2;
 global timepercentage_4;
 global angle_3;
@@ -73,6 +76,8 @@ for loopout = 1:18
     result2matrix = [];
     result3matrix = [];
     result4matrix = [];
+    
+    cenario3_interf = [cenario3_interf; 0];
 
     aux = [];
 
@@ -144,6 +149,10 @@ for loopout = 1:18
         else
             interference_pico2macro = false;
         end
+        
+        if(interference_macro2pico || interference_pico2macro)
+           cenario3_interf(loopout) = cenario3_interf(loopout) + 1;
+        end
             
         %SINR for the MACRO CELL
         if(interference_pico2macro)
@@ -172,43 +181,46 @@ for loopout = 1:18
         aux = [];
 
         %SINR for the MACRO CELL
-        SINR = (powerMacro) - pathLoss(hypot(TM_table(1,1),TM_table(1,2))) - powerNoise;
+        SINR = lin2db(...
+                    db2lin((powerMacro) - pathLoss(hypot(TM_table(1,1),TM_table(1,2)))) ...
+                    + db2lin((powerPico) - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))))..) ...
+                    - powerNoise;
         aux(1) = capacity(timepercentage_4, SINR);
 
-        %SINR for the PICO CELL
-        SINR = (powerPico) - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) - powerNoise;
-        aux(1) = aux(1) + capacity(timepercentage_4, SINR);
+%         %SINR for the PICO CELL
+%         SINR = (powerPico) - pathLoss(hypot(TM_table(1,1)-PicoTower(1),TM_table(1,2)-PicoTower(2))) - powerNoise;
+%         aux(1) = aux(1) + capacity(timepercentage_4, SINR);
 
         %SINR for the MACRO CELL
-        SINR = (powerMacro) - pathLoss(hypot(TM_table(2,1),TM_table(2,2))) - powerNoise;
+        SINR = lin2db(db2lin((powerMacro) - pathLoss(hypot(TM_table(2,1),TM_table(2,2)))) + db2lin((powerPico) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))))) - powerNoise;
         aux(2) = capacity(1 - timepercentage_4, SINR);
 
-        %SINR for the PICO CELL
-        SINR = (powerPico) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise;
-        aux(2) = aux(2) + capacity(1 - timepercentage_4, SINR);
+%         %SINR for the PICO CELL
+%         SINR = (powerPico) - pathLoss(hypot(TM_table(2,1)-PicoTower(1),TM_table(2,2)-PicoTower(2))) - powerNoise;
+%         aux(2) = aux(2) + capacity(1 - timepercentage_4, SINR);
 
         result4matrix = [result4matrix; aux];
 
     end
-% 
-% cdfCompare(result1matrix, 1)
-% 
+
+cdfCompare(result1matrix, 1)
+
 cdfCompare(result2matrix, 2)
-% 
-% interestingPlot(loopout,:) = mean(result2matrix,1);
-% 
-% cdfCompare(result3matrix, 3)
+
+interestingPlot(loopout,:) = mean(result2matrix,1);
+
+cdfCompare(result3matrix, 3)
 
 cdfCompare(result4matrix, 4)
 
 close all
 end
 
-%plot InterestingPlot (scenario 3)
-scatter(0.95:-0.05:0.1,interestingPlot(:,1));
-hold on; 
-scatter(0.95:-0.05:0.1,interestingPlot(:,2));
-hold off;
+% %plot InterestingPlot (scenario 3)
+% plot(0.95:-0.05:0.1,interestingPlot(:,1),'-x');
+% hold on; 
+% plot(0.95:-0.05:0.1,interestingPlot(:,2),'-x');
+% hold off;
 
 %% -- Function declarations --
 
@@ -254,7 +266,7 @@ function plotScenario()
     % Plot antennas range
     circle(MacroTower(1),MacroTower(2),MacroTower(3));
     circle(PicoTower(1),PicoTower(2),PicoTower(3));
-    legend('Antenna Macro','Antenna Pico','User Macro','User Pico')
+    
 %     title('Without Beamforming')
     xlabel('Distance (m)')
     ylabel('Distance (m)')
@@ -282,7 +294,9 @@ function plotScenario()
     plot(xplot, yplot, 'LineWidth',1)
     axis([-2500 2500 -2500 2500])
     
-    grid on\
+    legend('Antenna Macro','Antenna Pico','User Macro','User Pico')
+    
+    grid on
     hold off
 end
 
@@ -333,7 +347,7 @@ function cdfCompare(datamatrix, extra_param)
     legend('User 1 (macro)','User 2 (pico)','Location','best')
     hold off
     
-%     saveas(aux,filename,'png')
+    saveas(aux,filename,'png')
     
 end
 
